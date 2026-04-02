@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { fetchGitHubRepository } from "@/lib/github";
 import { sampleRepositories } from "@/lib/sample-data";
+import { analyzeWithResava } from "@/lib/resava-analysis";
 import { analyzeRepositories, filterRepositoryFiles } from "@/lib/similarity/engine";
 import type { RepositoryInput, ScanRequest, SupportedLanguage } from "@/lib/types";
 
@@ -36,6 +37,20 @@ export async function POST(request: Request) {
         },
         { status: 400 },
       );
+    }
+
+    if (body.engine === "resava") {
+      const minPct = body.resavaMinSimilarity;
+      const similarityPercent =
+        typeof minPct === "number" && Number.isFinite(minPct)
+          ? Math.min(100, Math.max(1, Math.round(minPct)))
+          : 40;
+      const preprocessor = body.resavaPreprocessor ?? "text";
+      const result = await analyzeWithResava(repositories, {
+        minSimilarityPercent: similarityPercent,
+        preprocessor,
+      });
+      return NextResponse.json(result);
     }
 
     return NextResponse.json(analyzeRepositories(repositories, body.method ?? "hybrid"));

@@ -1,6 +1,10 @@
 export type SupportedLanguage = "JavaScript" | "TypeScript" | "Python";
 
-export type ScanMethod = "hybrid" | "token" | "ast" | "embedding";
+export type ScanMethod = "hybrid" | "token" | "ast" | "embedding" | "resava";
+
+export type ScanEngine = "internal" | "resava";
+
+export type ResavaPreprocessor = "text" | "c" | "asm" | "none";
 
 export type SourceFile = {
   path: string;
@@ -20,6 +24,11 @@ export type ScanRequest = {
   languages: SupportedLanguage[];
   method: ScanMethod;
   includeSeededRepos: boolean;
+  /** Built-in similarity engine vs external resava CLI (normalized Levenshtein). */
+  engine?: ScanEngine;
+  /** Minimum similarity % to report when using resava (1–100). Default 40. */
+  resavaMinSimilarity?: number;
+  resavaPreprocessor?: ResavaPreprocessor;
 };
 
 export type RepoRecord = {
